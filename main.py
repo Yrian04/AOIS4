@@ -5,42 +5,31 @@ import source.utils as utils
 cnf_symbols = '*', '+'
 dnf_symbols = '+', '*'
 
-while True:
-    form = input("Choose the form os formula:\n\t1 - CNF\n\t2 - DNF\n")
-    match form:
-        case '1':
-            symbols = cnf_symbols
-        case '2':
-            symbols = dnf_symbols
-        case _:
-            print("Invalid input...")
-            continue
-    break
-
 builder = KarnaughMapBuilder()
 while True:
     string = input("Enter vector: ")
-    if form == "1":
-        new_str = ""
+    try:
+        dnf_karnaugh_map = builder.build(string)
+        cnf_string = ""
         for c in string:
             if c == '0':
-                new_str += '1'
+                cnf_string += '1'
             elif c == '1':
-                new_str += '0'
+                cnf_string += '0'
             else:
-                new_str += c
-        string = new_str
-    try:
-        karnaugh_map = builder.build(string)
+                cnf_string += c
+        cnf_karnaugh_map = builder.build(cnf_string)
     except ValueError as e:
         print(e)
         continue
     break
 
-formula = TableMethodReduceStrategy.get_formula_from_karnaugh_map(karnaugh_map)
-if form == "1":
-    for implicant in formula:
-        for var in implicant:
-            implicant.add(var[0], not var[1])
-            implicant.remove(var)
-print(formula.print(*symbols))
+dnf = TableMethodReduceStrategy.get_formula_from_karnaugh_map(dnf_karnaugh_map)
+print("DNF: ", dnf.print(*dnf_symbols))
+
+cnf = TableMethodReduceStrategy.get_formula_from_karnaugh_map(cnf_karnaugh_map)
+for implicant in cnf:
+    for var in implicant:
+        implicant.add(var[0], not var[1])
+        implicant.remove(var)
+print("CNF: ", cnf.print(*cnf_symbols))
